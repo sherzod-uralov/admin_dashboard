@@ -1,0 +1,12 @@
+.volume-file__upload input{
+  margin-bottom: 20px;
+}
+.volume-title__wrapper input{
+  margin-bottom: 20px;
+}
+input{
+  display: flex;
+}
+.volume-add input{
+  max-height: 50px;
+}

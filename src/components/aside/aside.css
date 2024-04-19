@@ -1,0 +1,121 @@
+a,
+ul,
+li {
+  text-decoration: none;
+}
+/* DESKTOP CSS */
+.aside {
+  width: 260px;
+  background: #ffffff;
+  box-shadow: 0 3px 9px 0 rgba(169, 184, 200, 0.15);
+  -webkit-box-shadow: 0 3px 9px 0 rgba(169, 184, 200, 0.15);
+  height: 100vh;
+}
+.aside-home {
+  padding-top: 30px;
+}
+.aside-logo a {
+  display: inline-block;
+  padding: 30px 20px 0px;
+  font-size: 40px;
+  color: #5d68db;
+  font-family: var(--font-family-sans-serif);
+  font-weight: 600;
+}
+.aside-home__link {
+  padding: 12px 30px;
+  font-family: "Rubik", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #818181;
+  display: block;
+  margin-right: 20px;
+  text-decoration: none;
+}
+.aside-home__link.active {
+  background: linear-gradient(
+    to right,
+    #8971ea,
+    #7f72ea,
+    #7574ea,
+    #6a75e9,
+    #5f76e8
+  );
+  color: #ffffff;
+  border-radius: 0 60px 60px 0;
+}
+.aside-home__link.active i {
+  color: #ffffff;
+}
+.dashborad-bottom__line {
+  height: 1px;
+  background: #818181;
+  display: block;
+  margin: 10px 0 20px 30px;
+  opacity: 0.1;
+}
+.aside-component__title {
+  font-size: 12px !important;
+  font-family: var(--font-family-sans-serif);
+  font-weight: 500;
+  line-height: 30px;
+  color: #000;
+  margin-left: 30px;
+}
+.aside-components {
+  padding-left: 0;
+}
+.aside-components li a {
+  padding: 12px 30px;
+  font-family: "Rubik", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #818181;
+  display: block;
+  margin-right: 20px;
+}
+.aside-home a i {
+  font-style: normal;
+  font-size: 20px;
+  display: inline-block;
+  text-align: center;
+  margin-right: 8px;
+}
+.aside-components li a i {
+  color: #9eabc0;
+  font-style: normal;
+  font-size: 20px;
+  display: inline-block;
+  text-align: center;
+  margin-right: 8px;
+}
+.aside-components li a.active {
+  background: linear-gradient(
+    to right,
+    #8971ea,
+    #7f72ea,
+    #7574ea,
+    #6a75e9,
+    #5f76e8
+  );
+  color: #ffffff;
+  border-radius: 0 60px 60px 0;
+}
+.aside-components li a.active i {
+  color: white;
+}
+.aside-components li a.inactive {
+  background-color: none;
+  text-decoration: none;
+}
+
+/* MEDIA FOR MOBILE */
+@media screen and (max-width: 440px) {
+  .aside {
+    position: absolute;
+    left: -260px;
+    top: 0;
+    bottom: 0;
+    width: 260px;
+  }
+}

@@ -1,0 +1,47 @@
+.category-list{
+  display: flex;
+  justify-content: space-between;
+}
+.category-name{
+  width: 200px;
+}
+.category-btn{
+  width: 200px;
+}
+.add-category{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 10px 20px;
+}
+.add-category.add-sub{
+  grid-template-columns: 1fr;
+}
+.add-sub input{
+  width: 50%;
+  margin-left: 0;
+ 
+}
+.add-sub label{
+  display: none;
+  font-size: 0px;
+}
+.category-file__upload{
+  display: flex;
+  flex-direction: column;
+}
+
+.delete-wrapper button{
+  margin-left: auto;
+  display: block;
+}
+.delete-wrapper{
+  padding-right: 0 !important;
+}
+.delete-title{
+  display: block;
+  margin-right: 125px;
+  text-align: end;
+}
+.department-add__btn{
+  margin-right: 80px;
+}
