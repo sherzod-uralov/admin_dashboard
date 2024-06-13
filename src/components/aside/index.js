@@ -23,7 +23,7 @@ const Sidebar = () => {
             }`}
             to="/"
           >
-            <i class="ri-home-8-line"></i>Dashboard
+            <i className="ri-home-8-line"></i>Dashboard
           </Link>
           <span className="dashborad-bottom__line"></span>
         </div>
@@ -32,50 +32,62 @@ const Sidebar = () => {
           <ul className="aside-components">
             <li>
               <Link
-                className={`${
-                  url === "http://localhost:3000/articles"
-                    ? "active"
-                    : "inactive"
-                }`}
-                to="/articles"
+                  className={`${
+                      url === "http://localhost:3000/articles"
+                          ? "active"
+                          : "inactive"
+                  }`}
+                  to="/articles"
               >
-                <i class="ri-archive-drawer-line"></i>Articles
+                <i className="ri-archive-drawer-line"></i>Articles
               </Link>
             </li>
             <li>
               <Link
-                className={`${
-                  url === "http://localhost:3000/category"
-                    ? "active"
-                    : "inactive"
-                }`}
-                to="/category"
+                  className={`${
+                      url === "http://localhost:3000/category"
+                          ? "active"
+                          : "inactive"
+                  }`}
+                  to="/category"
               >
-                <i class="ri-archive-drawer-line"></i>Category
+                <i className="ri-archive-drawer-line"></i>Category
               </Link>
             </li>
             <li>
               <Link
-                className={`${
-                  url === "http://localhost:3000/sub-category"
-                    ? "active"
-                    : "inactive"
-                }`}
-                to="/sub-category"
+                  className={`${
+                      url === "http://localhost:3000/sub-category"
+                          ? "active"
+                          : "inactive"
+                  }`}
+                  to="/sub-category"
               >
-                <i class="ri-archive-drawer-line"></i>Sub Category
+                <i className="ri-archive-drawer-line"></i>Sub Category
               </Link>
             </li>
             <li>
               <Link
-                className={`${
-                  url === "http://localhost:3000/add-volume"
-                    ? "active"
-                    : "inactive"
-                }`}
-                to="/add-volume"
+                  className={`${
+                      url === "http://localhost:3000/add-volume"
+                          ? "active"
+                          : "inactive"
+                  }`}
+                  to="/add-volume"
               >
-                <i class="ri-code-s-slash-line"></i>Volume Add
+                <i className="ri-code-s-slash-line"></i>Volume Add
+              </Link>
+            </li>
+            <li>
+              <Link
+                  className={`${
+                      url === "http://localhost:3000/add-volume"
+                          ? "active"
+                          : "inactive"
+                  }`}
+                  to="/author"
+              >
+                <i className="bi bi-person-add"></i>author
               </Link>
             </li>
           </ul>

@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "remixicon/fonts/remixicon.css";
 import CategorySub from "./pages/category-sub";
 import Article from "./pages/article";
+import Author from "./pages/author/Author";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/banner" element={<Banner />} />
         <Route path="/add-volume" element={<AddVolume />} />
         <Route path="/sub-category" element={<SubCategory />} />
+          <Route path="/author" element={<Author />} />
       </Routes>
       <ToastContainer />
     </>

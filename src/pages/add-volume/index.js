@@ -4,6 +4,7 @@ import { Col, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Aside from "../../components/aside";
 import "./add-volume.css";
+import api_url from "../../api";
 
 const AddVolume = () => {
   const [data, setData] = useState(null);
@@ -16,15 +17,17 @@ const AddVolume = () => {
   const title = useRef("");
   const publicationdate = useRef("");
   const publicationnumber = useRef("");
-
+  console.log(data)
   // GET Volumes
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_URL}/volumes`, {
-        headers: { "Content-Type": "application/json" }, // TO'G'RI!
+      .get(`${api_url}/volume`, {
+        headers: { "Content-Type": "application/json"
+        , Authorization:localStorage.getItem('accessToken')},
       })
       .then((response) => {
-        setVolume(response.data.data);
+        setVolume(response.data);
+        console.log(response)
       })
       .catch((err) => {
         console.log(err);
@@ -171,7 +174,7 @@ const AddVolume = () => {
                         <td>
                           <img
                             style={{ width: "50px", height: "50px" }}
-                            src={`${process.env.REACT_APP_API_URL}/${item.imageVolume}`}
+                            src={`${api_url}${item.image.file_path}`}
                             alt=""
                           />
                         </td>
@@ -186,6 +189,7 @@ const AddVolume = () => {
                             Удалить
                           </button>
                         </td>
+
                       </tr>
                     ))}
                 </tbody>

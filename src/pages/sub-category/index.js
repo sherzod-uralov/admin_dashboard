@@ -2,13 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { Col, Form, Modal } from "react-bootstrap";
 import Aside from "../../components/aside";
 import "./sub-category.css";
+import {Button, message} from "antd";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import api_url from "../../api";
 
 const SubCategory = () => {
   const [data, setData] = useState(null);
   const [categories, setCategories] = useState(null);
   const [changer, setChanger] = useState(true);
-
+  const [searchTerm, setSearchTerm] = useState("");
   const title = useRef("");
   const category = useRef("");
 
@@ -64,19 +67,33 @@ const SubCategory = () => {
   // Delete
   const handleCategoryDelete = async (event, id) => {
     event.preventDefault();
-    await fetch(`${process.env.REACT_APP_API_URL}/subcategory/delete/${id}`, {
-      method: "POST",
-      headers: {
-        Authorization: localStorage.getItem("accessToken"),
-      },
-    })
-      .then((res) => {
-        if (res.status === 200) {
-          setChanger(!changer);
-        }
-      })
-      .catch((err) => console.log(err));
+    try {
+      const response = await  axios.delete(
+          `${api_url}/subcategory/delete/${id}`,
+          {},
+          {
+            headers: {
+              Authorization: localStorage.getItem("accessToken"),
+            }
+          }
+      );
+
+      if (response.status === 200) {
+        setChanger(prev => !prev); // Holatni yangilash
+        message.success('Subcategory deleted successfully');
+      } else {
+        message.error('Failed to delete subcategory');
+      }
+    } catch (err) {
+      console.log(err)
+      console.error('Error deleting the subcategory:', err);
+      message.error('Failed to delete the subcategory due to an error');
+    }
   };
+
+  const filteredData = data ? data.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase())) : [];
+
+
 
   // Get
   useEffect(() => {
@@ -99,10 +116,9 @@ const SubCategory = () => {
       });
     })();
     console.log(data);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changer]);
 
-  // Edit Modal
+
   const [categoryShow, setCategoryShow] = useState(false);
   const handleCategoryClose = () => {
     setCategoryShow(false);
@@ -128,9 +144,9 @@ const SubCategory = () => {
         <div className="filter d-flex">
           <form className="search-card d-flex">
             <label htmlFor="">
-              <input placeholder="Search" className="search" type="text" />
+              <input placeholder="Search" value={searchTerm} className="search" type="text" onChange={e => setSearchTerm(e.target.value)} />
             </label>
-            <button className="search-btn  edit-btn">Search</button>
+            <Button size="large" onClick={() => setSearchTerm("")} className="search-btn edit-btn">Clear Search</Button>
           </form>
           <div className="add-article">
             <button
@@ -148,23 +164,15 @@ const SubCategory = () => {
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th>IMAGE</th>
                     <th>NAME</th>
                     <th className="delete-title">DELETE</th>
                   </tr>
                 </thead>
                 <tbody className="articles-table__body">
-                  {data &&
-                    data.map((item, index) => (
+                  {filteredData &&
+                      filteredData.map((item, index) => (
                       <tr key={item.id}>
                         <td>{index + 1}</td>
-                        <td>
-                          <img
-                            style={{ width: "50px", height: "50px" }}
-                            src={`${process.env.REACT_APP_API_URL}/${item.image}`}
-                            alt=""
-                          />
-                        </td>
                         <td>
                           <Link>{item.name}</Link>
                         </td>

@@ -9,6 +9,12 @@
   max-height: 100vh;
   overflow: scroll;
 }
+.articles-page {
+  margin-left: 30px;
+  width: 100%;
+  max-height: 100vh;
+  overflow: scroll;
+}
 .active {
   text-decoration: none;
 }
@@ -149,7 +155,14 @@ tbody tr:hover {
   border: none;
   transition: 0.3s all ease;
 }
-
+.access-btn {
+  border: none;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: 0.3s all ease;
+}
 .add-article {
   display: flex;
   align-items: center;
@@ -216,7 +229,6 @@ tbody tr:hover {
   background-color: #00416d29;
 }
 
-// Modal in
 .form-controls {
   border: 0.1px solid white !important;
   max-width: 90%;

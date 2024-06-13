@@ -4,6 +4,10 @@ import Aside from "../../components/aside";
 import { toast } from "react-toastify";
 import "./department.css";
 import { Link } from "react-router-dom";
+import api_url from "../../api";
+import {Button, message} from "antd";
+import axios from "axios";
+import {GrUpdate} from "react-icons/gr";
 
 const Category = () => {
   const [data, setData] = useState(null);
@@ -11,14 +15,15 @@ const Category = () => {
   const [img, setImg] = useState(null);
   const title = useRef("");
   const image = useRef("");
-
+  const [searchTerm, setSearchTerm] = useState("");
+  
   // Image
   const handleImageCertificate = async (e) => {
     const formData = new FormData();
     formData.append("file", e.target.files[0]);
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/file/upload`,
+        `${api_url}/file/upload`,
         {
           method: "POST",
           body: formData,
@@ -32,18 +37,20 @@ const Category = () => {
         const data = await response.json();
         const imageId = data.link.id; // Get the FullName from the response
         setImg(imageId);
-        toast.success("Muvaffaqiyatli yuklandi 👌");
+        message.success("Muvaffaqiyatli yuklandi");
         // Use the fileId as needed (e.g., store it in state or send it to the server)
       } else {
-        toast.error("Xatolik yuz berdi! 🤯");
+        message.error("Xatolik yuz berdi!");
       }
     } catch (err) {
       console.error("Error uploading file:", err);
-      toast.error("Xatolik yuz berdi! 🤯");
+      message.error("Xatolik yuz berdi!");
     }
   };
-  console.log(img);
-  // Add Category
+
+  const filteredData = data ? data.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase())) : [];
+
+
   const handleCategoryAdd = async (event) => {
     event.preventDefault();
     const request = {
@@ -57,7 +64,7 @@ const Category = () => {
 
     await fetch(`${process.env.REACT_APP_API_URL}/category/create`, request)
       .then((res) => {
-        if (res.status === 201) {
+        if (res.status === 200) {
           setChanger(!changer);
           handleCategoryClose();
         }
@@ -66,21 +73,28 @@ const Category = () => {
   };
   // Delete
   const handleCategoryDelete = async (event, id) => {
-    console.log(id);
     event.preventDefault();
-    await fetch(`${process.env.REACT_APP_API_URL}/category/delete/${id}`, {
-      method: "POST",
-      headers: {
-        Authorization: localStorage.getItem("accessToken"),
-      },
-    })  
-      .then((res) => {
-        if (res.status === 200) {
-          setChanger(!changer);
+    try {
+      const response = await axios({
+        method: 'post',
+        url: `${process.env.REACT_APP_API_URL}/category/delete/${id}`,
+        headers: {
+          Authorization: localStorage.getItem("accessToken"),
         }
-      })
-      .catch((err) => console.log(err));
+      });
+      if (response.status === 200) {
+        setChanger(prev => !prev);
+        message.success('Category deleted successfully');
+      } else {
+        message.error('Failed to delete category');
+      }
+    } catch (err) {
+      if(err.response.status === 500){
+      message.warning("Bu yo'nalishga tegishli yo'nalish sohalarini o'chirmaganingizcha ushbu yo'nalishni o'chira olmaysiz!",5);
+      }
+    }
   };
+
 
   // Get
   useEffect(() => {
@@ -119,6 +133,9 @@ const Category = () => {
     margin: "0px auto",
   };
 
+  console.log(data)
+
+
   return (
     <div className="home department">
       <div className="asid">
@@ -128,16 +145,17 @@ const Category = () => {
         <div className="filter d-flex">
           <form className="search-card d-flex">
             <label htmlFor="">
-              <input placeholder="Search" className="search" type="text" />
+              <input placeholder="Search" value={searchTerm} className="search" type="text"
+                     onChange={e => setSearchTerm(e.target.value)}/>
             </label>
-            <button className="search-btn  edit-btn">Search</button>
+            <Button size="large" onClick={() => setSearchTerm("")} className="search-btn edit-btn">Clear Search</Button>
           </form>
           <div className="add-article">
             <button
-              className="add-btn department-add__btn edit-btn"
-              onClick={handleCategoryShow}
+                className="add-btn department-add__btn edit-btn"
+                onClick={handleCategoryShow}
             >
-              Article Add
+              category Add
             </button>
           </div>
         </div>
@@ -146,46 +164,64 @@ const Category = () => {
             <div>
               <table className="table-wrapper" responsive="lg">
                 <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>IMAGE</th>
-                    <th>NAME</th>
-                    <th className="delete-title">DELETE</th>
-                  </tr>
+                <tr>
+                  <th>#</th>
+                  <th>IMAGE</th>
+                  <th>NAME</th>
+                  <th>UPDATE</th>
+                  <th className="delete-title">DELETE</th>
+                </tr>
                 </thead>
                 <tbody className="articles-table__body">
-                  {data &&
-                    data.map((item, index) => (
-                      <tr key={item.id}>
-                        <td>{index + 1}</td>
-                        <td>
-                          <img
-                            style={{ width: "50px", height: "50px" }}
-                            src={`${process.env.REACT_APP_API_URL}/${item.file_id}`}
-                            alt=""
-                          />
-                        </td>
-                        <td><Link to={`subarticle/${item.id}`}>{item.name}</Link></td>
-                        <td className="delete-wrapper">
-                          <button
-                            className="category-btn delete-btn"
-                            onClick={(event) =>
-                              handleCategoryDelete(event, item.id)
-                            }
-                          >
-                            <svg
-                              width={"24px"}
-                              height={"24px"}
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="rgba(236,26,26,1)"
+                  {filteredData &&
+                      filteredData.map((item, index) => (
+                          <tr key={item.id}>
+                            <td>{index + 1}</td>
+                            <td>
+                              <img
+                                  style={{width: "50px", height: "50px"}}
+                                  src={`${api_url}${item?.file?.file_path}`}
+                                  alt=""/>
+                            </td>
+                            <td><Link to={`subarticle/${item.id}`}>{item.name}</Link></td>
+                            <td className="cursor-pointer">
+                              <GrUpdate
+                                  className="m-auto block"
+                                  // onClick={(event) =>
+                                  //     handleArticleUpdates(item.id)
+                                  // }
                               >
-                                <path d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM18 8H6V20H18V8ZM9 11H11V17H9V11ZM13 11H15V17H13V11ZM9 4V6H15V4H9Z" />
-                              </svg>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width={"24px"}
+                                    height={"24px"}
+                                    viewBox="0 0 448 512"
+                                    fill="rgb(42, 119, 51)"
+                                >
+                                  {" "}
+                                  <path
+                                      d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
+                                </svg>
+                              </GrUpdate>
+                            </td>
+                            <td className="delete-wrapper">
+                              <button
+                                  className="category-btn delete-btn"
+                              >
+                                <svg
+                                    width={"24px"}
+                                    height={"24px"}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="rgba(236,26,26,1)"
+                                >
+                                  <path
+                                      d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM18 8H6V20H18V8ZM9 11H11V17H9V11ZM13 11H15V17H13V11ZM9 4V6H15V4H9Z"/>
+                                </svg>
+                              </button>
+                            </td>
+                          </tr>
+                      ))}
                 </tbody>
               </table>
             </div>
@@ -194,11 +230,11 @@ const Category = () => {
       </div>
       {/* Bootstrap Modal */}
       <Modal
-        aria-labelledby="example-modal-sizes-title-sm"
-        style={departmentStyle}
-        size="sm"
-        show={categoryShow}
-        onHide={handleCategoryClose}
+          aria-labelledby="example-modal-sizes-title-sm"
+          style={departmentStyle}
+          size="sm"
+          show={categoryShow}
+          onHide={handleCategoryClose}
       >
         <Modal.Header closeButton>
           <h2 className="modal-title">Add Category</h2>
@@ -210,7 +246,7 @@ const Category = () => {
               <h3 className="first-component">Name</h3>
               <Form.Group controlId="exampleForm.ControlInput2">
                 <Form.Label>Title</Form.Label>
-                <Form.Control ref={title} required type="text" />
+                <Form.Control ref={title} required type="text"/>
               </Form.Group>
             </div>
 
