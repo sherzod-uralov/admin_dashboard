@@ -42,6 +42,7 @@ const OpenSide = () => {
   const [tags, setTags] = useState([]);
   const [inputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const [volume,setVolume] = useState(null);
   const inputRef = useRef(null);
   useEffect(() => {
     if (inputVisible) {
@@ -190,6 +191,7 @@ const OpenSide = () => {
     getData("/category", setCategories);
     getData("/subcategory", setSubCategories);
     getData('/admin/profile', setAdminData);
+    getData('/volume', setVolume);
     getDataAuthor();
   }, []);
 
@@ -226,11 +228,11 @@ const OpenSide = () => {
             validateOnChange={false}
           initialValues={initialValues}
             validate={(values) => {
-              console.log(values)
+
               const errors= {}
               for (const key in values) {
-                if (!values[key]) {
-                  errors[key] = values[key]
+                if (key !== 'doi' && !values[key]) { // Skip 'doi' field
+                  errors[key] = 'Required'; // Set a more descriptive error message
                 }
               }
               if (Object.keys(errors).length > 0) {
@@ -242,6 +244,7 @@ const OpenSide = () => {
               return errors
             }}
           onSubmit={async (values,{setSubmitting,resetForm}) => {
+            console.log(values)
             setSubmitting(true)
             try {
               const res = await axios.post(`${api_url}/article/create`, {
@@ -263,8 +266,9 @@ const OpenSide = () => {
           }}}
         >
           {
-            ({setFieldValue, isSubmitting}) =>(
+            ({setFieldValue, isSubmitting,values}) =>(
                 <Form  layout="vertical" className="px-4 m-auto max-w-full">
+                  {console.log(values)}
                   <Space className="flex justify-end top-4 right-14 absolute">
                     <button className="bg-blue-500 text-white py-1.5 px-5 rounded-md"  type="submit">
                       Yaratish
@@ -373,7 +377,7 @@ const OpenSide = () => {
                           />
                       ) : (
                           <Tag className="w-full py-2" onClick={showInput} style={tagPlusStyle}>
-                            <PlusOutlined /> New Tag
+                            <PlusOutlined/> New Tag
                           </Tag>
                       )}
                     </div>
@@ -519,6 +523,31 @@ const OpenSide = () => {
                         <ErrorMessage
                             className="text-red-700 text-[13px]"
                             name="author"
+                            component="div"
+                        />
+                      </div>
+                    </div>
+                    <div className="col-span-full">
+                      <label
+                          htmlFor="volume_id"
+                          className="block text-sm font-medium leading-6 text-gray-900"
+                      >
+                        nashrni tanlang
+                        <strong className="text-md text-red-800">
+                          *
+                        </strong>
+                      </label>
+                      <div className="mt-2">
+                        <Select
+                            className="w-full"
+                            size="large"
+                            onChange={(e) => setFieldValue('valume_id', e)}
+                            options={valueAndLabel(volume, "id", "title")}
+                            placeholder="tanlang"
+                        />
+                        <ErrorMessage
+                            className="text-red-700 text-[13px]"
+                            name="volume_id"
                             component="div"
                         />
                       </div>

@@ -17,7 +17,37 @@ const Category = () => {
   const title = useRef("");
   const image = useRef("");
   const [searchTerm, setSearchTerm] = useState("");
-  
+  const [categoryShow, setCategoryShow] = useState(false);
+  const [categoryUpdateShow, setCategoryUpdateShow] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [updateCategory,setUpdateCategory] = useState({
+    title:'',
+    file_id:'',
+  });
+  const [updateId, setUpdateId] = useState(null);
+
+  const handleCategoryDelete = async (id) => {
+    try {
+      const response = await axios({
+        method: 'post',
+        url: `${process.env.REACT_APP_API_URL}/category/delete/${id}`,
+        headers: {
+          Authorization: localStorage.getItem("accessToken"),
+        }
+      });
+      if (response.status === 200) {
+        setChanger(prev => !prev);
+        message.success('Category deleted successfully');
+      } else {
+        message.error('Failed to delete category');
+      }
+    } catch (err) {
+      if(err.response.status === 500){
+        message.warning("Bu yo'nalishga tegishli yo'nalish sohalarini o'chirmaganingizcha ushbu yo'nalishni o'chira olmaysiz!",5);
+      }
+    }
+  };
   // Image
   const handleImageCertificate = async (e) => {
     const formData = new FormData();
@@ -38,6 +68,52 @@ const Category = () => {
         const data = await response.json();
         const imageId = data.link.id; // Get the FullName from the response
         setImg(imageId);
+        message.success("Muvaffaqiyatli yuklandi");
+        // Use the fileId as needed (e.g., store it in state or send it to the server)
+      } else {
+        message.error("Xatolik yuz berdi!");
+      }
+    } catch (err) {
+      console.error("Error uploading file:", err);
+      message.error("Xatolik yuz berdi!");
+    }
+  };
+
+  const showModal = (item) => {
+    setSelectedId(item)
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    if(selectedId){
+      handleCategoryDelete(selectedId)
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleUpdateImage = async (event) => {
+    const formData = new FormData();
+    formData.append("file", event.target.files[0]);
+    try{
+      const response = await fetch(
+          `${api_url}/file/upload`,
+          {
+            method: "POST",
+            body: formData,
+            headers: {
+              Authorization: localStorage.getItem("accessToken"),
+            },
+          }
+      );
+
+      if (response.status === 200) {
+        const data = await response.json();
+        const imageId = data.link.id; // Get the FullName from the response
+        setUpdateCategory((prevState) => ({...prevState,file_id:imageId}));
         message.success("Muvaffaqiyatli yuklandi");
         // Use the fileId as needed (e.g., store it in state or send it to the server)
       } else {
@@ -72,29 +148,40 @@ const Category = () => {
       })
       .catch((err) => console.log(err));
   };
-  // Delete
-  const handleCategoryDelete = async (event, id) => {
-    event.preventDefault();
-    try {
-      const response = await axios({
-        method: 'post',
-        url: `${process.env.REACT_APP_API_URL}/category/delete/${id}`,
-        headers: {
-          Authorization: localStorage.getItem("accessToken"),
-        }
-      });
-      if (response.status === 200) {
-        setChanger(prev => !prev);
-        message.success('Category deleted successfully');
-      } else {
-        message.error('Failed to delete category');
-      }
-    } catch (err) {
-      if(err.response.status === 500){
-      message.warning("Bu yo'nalishga tegishli yo'nalish sohalarini o'chirmaganingizcha ushbu yo'nalishni o'chira olmaysiz!",5);
-      }
+
+  const handleCategoryUpdate = async (e,id) => {
+    e.preventDefault();
+
+    let requestBody = {
+      name: updateCategory.title
+    };
+
+    // Only add file_id if it is not an empty string
+    if (updateCategory.file_id.trim() !== "") {
+      requestBody.file_id = updateCategory.file_id;
     }
+
+    const request = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: localStorage.getItem("accessToken"),
+      },
+      body: JSON.stringify(requestBody),
+    };
+
+    await fetch(`${process.env.REACT_APP_API_URL}/category/update/${id.id}`, request)
+        .then((res) => {
+          console.log(res)
+          if (res.status === 200) {
+            setChanger(!changer);
+            handleCategoryUpdateClose();
+          }
+        })
+        .catch((err) => console.log(err));
   };
+  // Delete
+
 
 
   // Get
@@ -121,9 +208,22 @@ const Category = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changer]);
   // Edit Modal
-  const [categoryShow, setCategoryShow] = useState(false);
+
   const handleCategoryClose = () => {
     setCategoryShow(false);
+  };
+
+  const handleCategoryUpdateClose = () => {
+    setCategoryUpdateShow(false);
+  };
+
+  const handleCategoryUpdateShow = (item) => {
+    setUpdateCategory((prevState) => ({
+      ...prevState,
+      title: item.name
+    }))
+    setUpdateId(item)
+    setCategoryUpdateShow(true);
   };
 
   const handleCategoryShow = () => {
@@ -139,6 +239,10 @@ const Category = () => {
 
   return (
     <div className="home department">
+      <Modal title="malumot!" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <h2>shu Yo'nalishni o'chirishga aminmisiz?</h2>
+        <p>malumotni o'chirganingizdan keyin qayta tiklab bo'lmaydi!</p>
+      </Modal>
       <div className="asid">
         <Aside />
       </div>
@@ -187,7 +291,25 @@ const Category = () => {
                             </td>
                             <td><Link to={`subarticle/${item.id}`}>{item.name}</Link></td>
                             <td className="cursor-pointer">
-                              <BsPencilFill className="text-indigo-600" />
+                              <GrUpdate
+                                  onClick={() => handleCategoryUpdateShow(item)}
+                                  className="m-auto block"
+                                  // onClick={(event) =>
+                                  //     handleArticleUpdates(item.id)
+                                  // }
+                              >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width={"24px"}
+                                    height={"24px"}
+                                    viewBox="0 0 448 512"
+                                    fill="rgb(42, 119, 51)"
+                                >
+                                  {" "}
+                                  <path
+                                      d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
+                                </svg>
+                              </GrUpdate>
                             </td>
                             <td className="delete-wrapper">
                               <button
@@ -262,6 +384,59 @@ const Category = () => {
             type="submit"
           >
             Submit
+          </button>
+        </div>
+      </Modal>
+      <Modal
+          aria-labelledby="example-modal-sizes-title-sm"
+          style={departmentStyle}
+          size="sm"
+          show={categoryUpdateShow}
+          onHide={handleCategoryUpdateClose}
+      >
+        <Modal.Header closeButton>
+          <h2 className="modal-title">Yo'nalishni yangilash</h2>
+        </Modal.Header>
+        <Modal.Body>
+          <form className="add-category">
+            {/* Title */}
+            <div className="title-wrapper">
+              <h3 className="first-component">Sarlavha</h3>
+              <Form.Group controlId="exampleForm.ControlInput2">
+                <Form.Label>matn</Form.Label>
+                <Form.Control value={updateCategory.title} onChange={(e) => setUpdateCategory((prevState) => ({
+                  ...prevState,
+                  title: e.target.value
+                }))} required type="text"/>
+              </Form.Group>
+            </div>
+
+            <div className="category-file__upload">
+              <h3 className="file-upload__component">File Upload</h3>
+              <Form.Group controlId="formFileLg" className="mb-3">
+                <Form.Label>Download Image</Form.Label>
+                <Form.Control
+                    onChange={(e) => handleUpdateImage(e)}
+                    accept="image/jpg,image/jpeg,image/png"
+                    required
+                    aria-label="file example"
+                    type="file"
+                    size="md"
+                />
+              </Form.Group>
+            </div>
+          </form>
+        </Modal.Body>
+        <div className="footer-modal">
+          <button className="delete-btn close-btn" onClick={handleCategoryUpdateClose}>
+            yopish
+          </button>
+          <button
+              className="edit-btn save-btn"
+              onClick={e => handleCategoryUpdate(e,updateId)}
+              type="submit"
+          >
+            yangilash
           </button>
         </div>
       </Modal>
