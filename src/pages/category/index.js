@@ -8,7 +8,8 @@ import api_url from "../../api";
 import {Button, message} from "antd";
 import axios from "axios";
 import {GrUpdate} from "react-icons/gr";
-
+import { TiPlus } from "react-icons/ti";
+import { BsPencilFill } from "react-icons/bs";
 const Category = () => {
   const [data, setData] = useState(null);
   const [changer, setChanger] = useState(true);
@@ -145,17 +146,18 @@ const Category = () => {
         <div className="filter d-flex">
           <form className="search-card d-flex">
             <label htmlFor="">
-              <input placeholder="Search" value={searchTerm} className="search" type="text"
+              <input placeholder="Qidirish..." value={searchTerm} className="search" type="text"
                      onChange={e => setSearchTerm(e.target.value)}/>
             </label>
-            <Button size="large" onClick={() => setSearchTerm("")} className="search-btn edit-btn">Clear Search</Button>
+            <Button size="large" onClick={() => setSearchTerm("")} className="search-btn edit-btn">Qidiruv</Button>
           </form>
           <div className="add-article">
             <button
-                className="add-btn department-add__btn edit-btn"
+                className="add-btn department-add__btn edit-btn flex justify-center items-center"
                 onClick={handleCategoryShow}
             >
-              category Add
+              Yo'nalish
+              <TiPlus className="ml-2 "/>
             </button>
           </div>
         </div>
@@ -165,11 +167,11 @@ const Category = () => {
               <table className="table-wrapper" responsive="lg">
                 <thead>
                 <tr>
-                  <th>#</th>
-                  <th>IMAGE</th>
-                  <th>NAME</th>
-                  <th>UPDATE</th>
-                  <th className="delete-title">DELETE</th>
+                  <th>№</th>
+                  <th>SUR'AT</th>
+                  <th>ISM</th>
+                  <th>YANGILASH</th>
+                  <th className="delete-title">O'CHIRISH</th>
                 </tr>
                 </thead>
                 <tbody className="articles-table__body">
@@ -185,24 +187,7 @@ const Category = () => {
                             </td>
                             <td><Link to={`subarticle/${item.id}`}>{item.name}</Link></td>
                             <td className="cursor-pointer">
-                              <GrUpdate
-                                  className="m-auto block"
-                                  // onClick={(event) =>
-                                  //     handleArticleUpdates(item.id)
-                                  // }
-                              >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width={"24px"}
-                                    height={"24px"}
-                                    viewBox="0 0 448 512"
-                                    fill="rgb(42, 119, 51)"
-                                >
-                                  {" "}
-                                  <path
-                                      d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
-                                </svg>
-                              </GrUpdate>
+                              <BsPencilFill className="text-indigo-600" />
                             </td>
                             <td className="delete-wrapper">
                               <button
