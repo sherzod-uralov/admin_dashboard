@@ -1,13 +1,13 @@
 import React from "react";
-import { Link } from "react-router-dom";
-
+import {Link, useLocation} from "react-router-dom";
+import { BsPersonFillCheck } from "react-icons/bs";
 // Image
 import logo from "../../assets/img/dash-logo.png";
 // CSS
 import "./aside.css";
 
 const Sidebar = () => {
-  const url = window.location.href;
+  const url = useLocation();
   return (
     <div className="aside">
       <nav className="aside-nav">
@@ -19,7 +19,7 @@ const Sidebar = () => {
         <div className="aside-home">
           <Link
             className={`aside-home__link ${
-              url === "http://localhost:3000/home" ? "active" : "inactive"
+                url.pathname === "/home" ? "active" : "inactive"
             }`}
             to="/"
           >
@@ -33,61 +33,65 @@ const Sidebar = () => {
             <li>
               <Link
                   className={`${
-                      url === "http://localhost:3000/articles"
+                      url.pathname === "/articles"
                           ? "active"
                           : "inactive"
                   }`}
                   to="/articles"
               >
-                <i className="ri-archive-drawer-line"></i>Articles
+                <i className="ri-archive-drawer-line"></i>Maqolalar
               </Link>
             </li>
             <li>
               <Link
                   className={`${
-                      url === "http://localhost:3000/category"
+                      url.pathname === "/category"
                           ? "active"
                           : "inactive"
                   }`}
                   to="/category"
               >
-                <i className="ri-archive-drawer-line"></i>Category
+                <i className="ri-archive-drawer-line"></i>Yonalishlar
               </Link>
             </li>
             <li>
               <Link
                   className={`${
-                      url === "http://localhost:3000/sub-category"
+                      url.pathname === "/sub-category"
                           ? "active"
                           : "inactive"
                   }`}
                   to="/sub-category"
               >
-                <i className="ri-archive-drawer-line"></i>Sub Category
+                <i className="ri-archive-drawer-line"></i>Soha Yo'nalishi
               </Link>
             </li>
             <li>
               <Link
                   className={`${
-                      url === "http://localhost:3000/add-volume"
+                      url.pathname === "/add-volume"
                           ? "active"
                           : "inactive"
                   }`}
                   to="/add-volume"
               >
-                <i className="ri-code-s-slash-line"></i>Volume Add
+                <i className="ri-code-s-slash-line"></i>Nashr Qo'shish
               </Link>
             </li>
-            <li>
+            <li >
               <Link
                   className={`${
-                      url === "http://localhost:3000/add-volume"
+                      url.pathname === "/author"
                           ? "active"
                           : "inactive"
                   }`}
                   to="/author"
               >
-                <i className="bi bi-person-add"></i>author
+                <div className="flex items-center">
+                  <BsPersonFillCheck className="inline mr-2 text-2xl text-indigo-600" />
+                  <p>Muallif</p>
+                </div>
+
               </Link>
             </li>
           </ul>
