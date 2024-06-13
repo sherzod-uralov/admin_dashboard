@@ -1,6 +1,12 @@
 import React from "react";
 import {Link, useLocation} from "react-router-dom";
+//Icons
 import { BsPersonFillCheck } from "react-icons/bs";
+import { IoDocumentAttach } from "react-icons/io5";
+import { PiArticleMediumFill } from "react-icons/pi";
+import { HiDocumentSearch } from "react-icons/hi";
+import { HiMiniDocumentCheck } from "react-icons/hi2";
+import { SiHomeadvisor } from "react-icons/si";
 // Image
 import logo from "../../assets/img/dash-logo.png";
 // CSS
@@ -23,12 +29,18 @@ const Sidebar = () => {
             }`}
             to="/"
           >
-            <i className="ri-home-8-line"></i>Dashboard
+            <div className="flex items-center">
+              <SiHomeadvisor className={`inline mr-2 text-2xl text-indigo-600 
+                     ${url.pathname === "/home"
+                  ? "fill-white"
+                  : "text-indigo-600"}`}/>  <p>Bosh Sahifa</p>
+            </div>
+
           </Link>
           <span className="dashborad-bottom__line"></span>
         </div>
         <div className="aside-components__wrapper">
-          <h3 className="aside-component__title">APPLICATIONS</h3>
+          <h3 className="aside-component__title text-xl text-indigo-600 ">ILOVALAR</h3>
           <ul className="aside-components">
             <li>
               <Link
@@ -39,7 +51,13 @@ const Sidebar = () => {
                   }`}
                   to="/articles"
               >
-                <i className="ri-archive-drawer-line"></i>Maqolalar
+                <div className="flex items-center">
+                  <PiArticleMediumFill className={`inline mr-2 text-2xl text-indigo-600 
+                     ${ url.pathname === "/articles"
+                      ? "fill-white"
+                      : "text-indigo-600"}`} />  <p>Maqolalar</p>
+                </div>
+
               </Link>
             </li>
             <li>
@@ -51,7 +69,13 @@ const Sidebar = () => {
                   }`}
                   to="/category"
               >
-                <i className="ri-archive-drawer-line"></i>Yonalishlar
+                <div className="flex items-center">
+                  <HiMiniDocumentCheck className={`inline mr-2 text-2xl text-indigo-600 
+                     ${url.pathname === "/category"
+                      ? "fill-white"
+                      : "text-indigo-600"}`}/>  <p> Yo'nalishlar</p>
+                </div>
+
               </Link>
             </li>
             <li>
@@ -63,7 +87,13 @@ const Sidebar = () => {
                   }`}
                   to="/sub-category"
               >
-                <i className="ri-archive-drawer-line"></i>Soha Yo'nalishi
+
+                <div className="flex items-center">
+                  <HiDocumentSearch className={`inline mr-2 text-2xl text-indigo-600 
+                     ${url.pathname === "/sub-category"
+                      ? "fill-white"
+                      : "text-indigo-600"}`}/>  <p>Soha Yo'nalishlari</p>
+                </div>
               </Link>
             </li>
             <li>
@@ -75,7 +105,15 @@ const Sidebar = () => {
                   }`}
                   to="/add-volume"
               >
-                <i className="ri-code-s-slash-line"></i>Nashr Qo'shish
+
+              <div className="flex items-center">
+                  <IoDocumentAttach className={`inline mr-2 text-2xl text-indigo-600 
+                     ${ url.pathname === "/add-volume"
+                          ? "fill-white"
+                          : "text-indigo-600"}`}/>
+                  <p>Nashr Qo'shish</p>
+                </div>
+
               </Link>
             </li>
             <li >
@@ -88,8 +126,11 @@ const Sidebar = () => {
                   to="/author"
               >
                 <div className="flex items-center">
-                  <BsPersonFillCheck className="inline mr-2 text-2xl text-indigo-600" />
-                  <p>Muallif</p>
+                  <BsPersonFillCheck className={`inline mr-2 text-2xl text-indigo-600 
+                     ${ url.pathname === "/author"
+                      ? "fill-white"
+                      : "text-indigo-600"}`} />
+                  <p>Mualliflar</p>
                 </div>
 
               </Link>

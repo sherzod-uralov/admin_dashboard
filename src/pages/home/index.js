@@ -7,8 +7,8 @@ const Home = () => {
         <div className="asid">
           <Aside />
         </div>
-        <div className="articles-wrapper">
-            
+        <div className="articles-wrapper flex justify-center items-center">
+            <h1>Loading^) </h1>
         </div>
         </div>
     </>
