@@ -133,12 +133,12 @@ const CategorySub = () => {
                         <td>
                           <img
                             style={{ width: "50px", height: "50px" }}
-                            src={`${process.env.REACT_APP_API_URL}/${item.file_id}`}
+                            src={`https://static.vecteezy.com/system/resources/previews/004/141/669/original/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg`}
                             alt=""
                           />
                         </td>
                         <td>
-                          <Link>{item.name}</Link>
+                          <h2>{item.name}</h2>
                         </td>
                         <td className="delete-wrapper">
                           <button
@@ -174,7 +174,7 @@ const CategorySub = () => {
           <form className="add-category add-sub">
             {/* Title */}
             <div className="title-wrapper">
-              <h3 className="first-component">Name</h3>
+              <h3 className="first-component">Ismi</h3>
               <Form.Group controlId="exampleForm.ControlInput2">
                 <Form.Label>Title</Form.Label>
                 <Form.Control ref={title} required type="text" />

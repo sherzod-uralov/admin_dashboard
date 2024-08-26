@@ -1,140 +1,92 @@
+/** @format */
+
 import React from "react";
-import {Link, useLocation} from "react-router-dom";
-//Icons
+import { NavLink, Link, useLocation } from "react-router-dom";
+// Icons
 import { BsPersonFillCheck } from "react-icons/bs";
 import { IoDocumentAttach } from "react-icons/io5";
 import { PiArticleMediumFill } from "react-icons/pi";
 import { HiDocumentSearch } from "react-icons/hi";
 import { HiMiniDocumentCheck } from "react-icons/hi2";
-import { SiHomeadvisor } from "react-icons/si";
-// Image
+import { FaRegNewspaper } from "react-icons/fa6";
+import { IoChatboxEllipsesSharp } from "react-icons/io5";
+import { TbSeo } from "react-icons/tb";
 import logo from "../../assets/img/dash-logo.png";
-// CSS
+import { FaChartBar } from "react-icons/fa";
 import "./aside.css";
 
 const Sidebar = () => {
   const url = useLocation();
+
+  const links = [
+    {
+      path: "/articles",
+      icon: <PiArticleMediumFill />,
+      label: "Maqolalar",
+    },
+    {
+      path: "/category",
+      icon: <HiMiniDocumentCheck />,
+      label: "Yo'nalishlar",
+    },
+    {
+      path: "/sub-category",
+      icon: <HiDocumentSearch />,
+      label: "Yo‘nalish sohalari",
+    },
+    {
+      path: "/add-volume",
+      icon: <IoDocumentAttach />,
+      label: "Nashr Qo'shish",
+    },
+    {
+      path: "/author",
+      icon: <BsPersonFillCheck />,
+      label: "Mualliflar",
+    },
+    {
+      path: "/news",
+      icon: <FaRegNewspaper />,
+      label: "Yangiliklar",
+    },
+    {
+      path: "/chats",
+      icon: <IoChatboxEllipsesSharp />,
+      label: "Chatlar",
+    },
+    {
+      path: "/statistics",
+      icon: <FaChartBar />,
+      label: "Statistika",
+    },
+  ];
+
   return (
-    <div className="aside">
+    <div className="aside bg-gray-50">
       <nav className="aside-nav">
         <div className="aside-logo">
-          <Link to="/">
+          <Link to="/articles">
             <img src={logo} alt="Logo" width="180px" />
           </Link>
         </div>
-        <div className="aside-home">
-          <Link
-            className={`aside-home__link ${
-                url.pathname === "/home" ? "active" : "inactive"
-            }`}
-            to="/"
-          >
-            <div className="flex items-center">
-              <SiHomeadvisor className={`inline mr-2 text-2xl text-indigo-600 
-                     ${url.pathname === "/home"
-                  ? "fill-white"
-                  : "text-indigo-600"}`}/>  <p>Bosh Sahifa</p>
-            </div>
-
-          </Link>
-          <span className="dashborad-bottom__line"></span>
-        </div>
         <div className="aside-components__wrapper">
-          <h3 className="aside-component__title text-xl text-indigo-600 ">ILOVALAR</h3>
           <ul className="aside-components">
-            <li>
-              <Link
-                  className={`${
-                      url.pathname === "/articles"
-                          ? "active"
-                          : "inactive"
-                  }`}
-                  to="/articles"
-              >
-                <div className="flex items-center">
-                  <PiArticleMediumFill className={`inline mr-2 text-2xl text-indigo-600 
-                     ${ url.pathname === "/articles"
-                      ? "fill-white"
-                      : "text-indigo-600"}`} />  <p>Maqolalar</p>
-                </div>
-
-              </Link>
-            </li>
-            <li>
-              <Link
-                  className={`${
-                      url.pathname === "/category"
-                          ? "active"
-                          : "inactive"
-                  }`}
-                  to="/category"
-              >
-                <div className="flex items-center">
-                  <HiMiniDocumentCheck className={`inline mr-2 text-2xl text-indigo-600 
-                     ${url.pathname === "/category"
-                      ? "fill-white"
-                      : "text-indigo-600"}`}/>  <p> Yo'nalishlar</p>
-                </div>
-
-              </Link>
-            </li>
-            <li>
-              <Link
-                  className={`${
-                      url.pathname === "/sub-category"
-                          ? "active"
-                          : "inactive"
-                  }`}
-                  to="/sub-category"
-              >
-
-                <div className="flex items-center">
-                  <HiDocumentSearch className={`inline mr-2 text-2xl text-indigo-600 
-                     ${url.pathname === "/sub-category"
-                      ? "fill-white"
-                      : "text-indigo-600"}`}/>  <p>Soha Yo'nalishlari</p>
-                </div>
-              </Link>
-            </li>
-            <li>
-              <Link
-                  className={`${
-                      url.pathname === "/add-volume"
-                          ? "active"
-                          : "inactive"
-                  }`}
-                  to="/add-volume"
-              >
-
-              <div className="flex items-center">
-                  <IoDocumentAttach className={`inline mr-2 text-2xl text-indigo-600 
-                     ${ url.pathname === "/add-volume"
+            {links.map((link) => (
+              <li key={link.path}>
+                <NavLink to={link.path}>
+                  <div className="flex items-center">
+                    {React.cloneElement(link.icon, {
+                      className: `inline mr-2 text-2xl text-indigo-600 ${
+                        url.pathname === link.path
                           ? "fill-white"
-                          : "text-indigo-600"}`}/>
-                  <p>Nashr Qo'shish</p>
-                </div>
-
-              </Link>
-            </li>
-            <li >
-              <Link
-                  className={`${
-                      url.pathname === "/author"
-                          ? "active"
-                          : "inactive"
-                  }`}
-                  to="/author"
-              >
-                <div className="flex items-center">
-                  <BsPersonFillCheck className={`inline mr-2 text-2xl text-indigo-600 
-                     ${ url.pathname === "/author"
-                      ? "fill-white"
-                      : "text-indigo-600"}`} />
-                  <p>Mualliflar</p>
-                </div>
-
-              </Link>
-            </li>
+                          : "text-indigo-600"
+                      }`,
+                    })}
+                    <p>{link.label}</p>
+                  </div>
+                </NavLink>
+              </li>
+            ))}
           </ul>
         </div>
       </nav>

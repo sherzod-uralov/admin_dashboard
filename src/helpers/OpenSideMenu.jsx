@@ -1,3 +1,5 @@
+/** @format */
+
 // SideUpdateMenu.js
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
@@ -13,52 +15,40 @@ import {
 } from "antd";
 import axios from "axios";
 import api_url from "../api";
-import { ErrorMessage, Field,Form, Formik } from "formik";
+import { ErrorMessage, Field, Form, Formik } from "formik";
 import { TweenOneGroup } from "rc-tween-one";
 import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import { MyState } from "../state/Context.store";
-import * as Yup from "yup";
-
-const scrollToFirstError = (errors) => {
-  for (const errorField in errors) {
-    const errorElement = document.getElementById(errorField);
-    if (errorElement) {
-      errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(() => {
-        errorElement.focus();
-      }, 600);
-      break;
-    }
-  }
-};
 
 const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
-  const { open, setOpen, setAdd,setUpdate } = useContext(MyState);
+  const { open, setOpen, setAdd, setUpdate } = useContext(MyState);
   const [categoies, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [author, setAuthor] = useState([]);
+  const [volume, setVolume] = useState(null);
   const [adminData, setAdminData] = useState({});
   const { token } = theme.useToken();
   const [tags, setTags] = useState([]);
   const [inputVisible, setInputVisible] = useState(false);
+  const [status, setStatus] = useState("");
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
+  const [disable, setDisable] = useState(false);
 
   const getData = async (url, set) => {
     try {
-      const response = await axios.get(`${api_url}${url}`,{
-          headers:{
-              Authorization:localStorage.getItem("accessToken"),
-          }
+      const response = await axios.get(`${api_url}${url}`, {
+        headers: {
+          Authorization: localStorage.getItem("accessToken"),
+        },
       });
       set(response.data);
     } catch (e) {
       console.log(e);
     }
   };
-
   useEffect(() => {
     if (formData.keyword) {
       setTags(formData.keyword.split(","));
@@ -85,17 +75,18 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
             author_id: data.author_id,
             image_id: data.image_id,
             source_id: data.source_id,
+            status: data.status,
+            volume_id: data.volume_id,
           });
           setLoading(false);
         })
         .catch((error) => {
           console.log(error);
-          message.error("Failed to fetch article details");
+          message.error("Maqolani yuklashda xatolik!");
           setLoading(false);
         });
     }
   }, [id, visible]);
-
 
   const showInput = () => {
     setInputVisible(true);
@@ -106,16 +97,14 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
   };
 
   const handleInputConfirm = (setField) => {
-      console.log(tags)
     if (inputValue && tags.indexOf(inputValue) === -1) {
-        const newTags = [...tags, inputValue];
-        setTags(newTags);
-        setField('keyword', newTags.join(','));
+      const newTags = [...tags, inputValue];
+      setTags(newTags);
+      setField("keyword", newTags.join(","));
     }
     setInputVisible(false);
     setInputValue("");
   };
-
 
   const tagPlusStyle = {
     background: token.colorBgContainer,
@@ -133,44 +122,6 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
     } catch (e) {
       console.log(e);
     }
-  };
-
-  const handleFormSubmit = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.post(
-        `${api_url}/article/update/${id}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: localStorage.getItem("accessToken"),
-          },
-        },
-      );
-      if (response.status === 200) {
-        message.success("Article updated successfully");
-        onUpdate();
-        onClose();
-      } else {
-        message.error("Failed to update the article");
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error updating the article:", error);
-      message.error("Failed to update the article due to an error");
-      setLoading(false);
-    }
-  };
-
-  const initialValues = {
-    title: "",
-    abstract: "",
-    description: "",
-    keyword: tags.join(","),
-    doi: "",
-    image_id: "",
-    source_id: "",
   };
 
   const UploadProps = (field) => {
@@ -228,11 +179,12 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
     getData("/category", setCategories);
     getData("/subcategory", setSubCategories);
     getData("/admin/profile", setAdminData);
+    getData("/volume", setVolume);
     getDataAuthor();
   }, []);
   return (
     <Drawer
-      title="Update Article"
+      title="Maqolani tahrirlash"
       width={700}
       onClose={onClose}
       visible={visible}
@@ -244,7 +196,7 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
         initialValues={formData}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
           setSubmitting(true);
-          console.log(values);
+
           try {
             const res = await axios.post(
               `${api_url}/article/update/${id}`,
@@ -257,37 +209,41 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                 },
               },
             );
-              console.log(res)
+
             message.success("Maqola muvafaqiyatli yangilandi!");
             onClose();
             resetForm();
             setAdd(true);
-            setUpdate(true)
+            setUpdate((prev) => !prev);
           } catch (e) {
+            if (e.response?.status === 400) {
+              message.error(e.response?.data?.message);
+            }
             if (e.response?.status === 409) {
-              message.error("bu malumot allaqachon qoshilgan");
+              message.error("Allaqachon mavjud!");
             }
             setSubmitting(false);
+            console.log(e);
           }
         }}
       >
-        {({ setFieldValue, isSubmitting, values }) => (
-          <Form layout="vertical" className="px-4 m-auto max-w-full">
+        {({ setFieldValue, values }) => (
+          <Form layout="vertical" className="m-auto max-w-full">
             <Space className="flex justify-end top-4 right-14 absolute">
               <button
                 className="bg-blue-500 text-white py-1.5 px-5 rounded-md"
                 type="submit"
               >
-                Yaratish
+                Tahrirlash
               </button>
             </Space>
-            <div className="space-y-12 mt-5 mb-3">
+            <div className="space-y-4">
               <div className="col-span-full">
                 <label
                   htmlFor="title"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Sarlavfha matni
+                  Sarlavha
                   <strong className="text-md text-red-800">*</strong>
                 </label>
                 <div className="mt-2">
@@ -310,7 +266,7 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                   htmlFor="abstract"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  abstract
+                  Abstrakt
                   <strong className="text-md text-red-800">*</strong>
                 </label>
                 <div className="mt-2">
@@ -333,7 +289,7 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                   htmlFor="keyword"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Kalit so'z
+                  Kalit so‘z
                   <strong className="text-md text-red-800">*</strong>
                 </label>
                 <div
@@ -363,7 +319,13 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                     }}
                   >
                     {tags.map((tag) => (
-                      <span key={tag} style={{ display: "inline-block" }}>
+                      <span
+                        key={tag}
+                        style={{
+                          display: "inline-block",
+                          marginBottom: "5px",
+                        }}
+                      >
                         <Tag
                           closable
                           onClose={(e) => {
@@ -396,7 +358,7 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                     onClick={showInput}
                     style={tagPlusStyle}
                   >
-                    <PlusOutlined /> New Tag
+                    <PlusOutlined /> Yangi kalit so‘z
                   </Tag>
                 )}
               </div>
@@ -405,7 +367,7 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                   htmlFor="doi"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Doini kiriting
+                  DOI
                   <strong className="text-md text-red-800">*</strong>
                 </label>
                 <div className="mt-2">
@@ -428,7 +390,7 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                   htmlFor="category"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Yo'nalishlar
+                  Yo‘nalishlar
                   <strong className="text-md text-red-800">*</strong>
                 </label>
                 <div className="mt-2">
@@ -436,12 +398,15 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                     size="large"
                     className="w-full"
                     value={values.categoryId}
-                    onChange={(e) => setFieldValue("categoryId", e)}
+                    onChange={(e) => {
+                      setFieldValue("categoryId", e);
+                      setDisable(true);
+                    }}
                     options={categoies.map((cat) => ({
                       label: cat.name,
                       value: cat.id,
                     }))}
-                    placeholder="tanlang"
+                    placeholder="Tanlang"
                   />
                   <ErrorMessage
                     className="text-red-700 text-[13px]"
@@ -455,17 +420,18 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                   htmlFor="SubCategoryId"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  ichki Yo'nalishlar
+                  Yo‘nalish sohalari
                   <strong className="text-md text-red-800">*</strong>
                 </label>
                 <div className="mt-2">
                   <Select
                     size="large"
+                    disabled={false}
                     className="w-full"
                     value={values.SubCategoryId}
                     onChange={(e) => setFieldValue("SubCategoryId", e)}
                     options={valueAndLabel(subCategories, "id", "name")}
-                    placeholder="tanlang"
+                    placeholder="Tanlang"
                   />
                   <ErrorMessage
                     className="text-red-700 text-[13px]"
@@ -479,7 +445,7 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                   htmlFor="image"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  rasm yuklash
+                  Maqola muqovasi uchun rasm yuklang
                   <strong className="text-md text-red-800">*</strong>
                 </label>
                 <div className="mt-2">
@@ -489,7 +455,7 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                       style={{ width: 605 }}
                       icon={<UploadOutlined />}
                     >
-                      Click to Upload
+                      Yuklash uchun bosing
                     </Button>
                   </Upload>
                   <ErrorMessage
@@ -504,7 +470,7 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                   htmlFor="image"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  maqola uchun file yuklash
+                  Maqola manbaasini yuklash
                   <strong className="text-md text-red-800">*</strong>
                 </label>
                 <div className="mt-2">
@@ -514,7 +480,7 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                       style={{ width: 605 }}
                       icon={<UploadOutlined />}
                     >
-                      Click to Upload
+                      Yuklash uchun bosing
                     </Button>
                   </Upload>
                   <ErrorMessage
@@ -539,7 +505,7 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
                     value={values.author_id}
                     onChange={(e) => setFieldValue("author_id", e)}
                     options={valueAndLabel(author, "id", "full_name")}
-                    placeholder="tanlang"
+                    placeholder="Tanlang"
                   />
                   <ErrorMessage
                     className="text-red-700 text-[13px]"
@@ -550,20 +516,106 @@ const SideUpdateMenu = ({ id, visible, onClose, onUpdate }) => {
               </div>
               <div className="col-span-full">
                 <label
+                  htmlFor="volume_id"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Nashrni tanlang
+                  <strong className="text-md text-red-800">*</strong>
+                </label>
+                <div className="mt-2">
+                  <Select
+                    className="w-full"
+                    size="large"
+                    onChange={(e) => setFieldValue("volume_id", e)}
+                    options={valueAndLabel(volume, "id", "title")}
+                    placeholder="Tanlang"
+                  />
+                  <ErrorMessage
+                    className="text-red-700 text-[13px]"
+                    name="volume_id"
+                    component="div"
+                  />
+                </div>
+              </div>
+              <div className="col-span-full">
+                <label
+                  htmlFor="author"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Holatini o‘zgartirish
+                  <strong className="text-md text-red-800"></strong>
+                </label>
+                <div className="mt-2">
+                  <Select
+                    className="w-full"
+                    size="large"
+                    value={values.status}
+                    onChange={(e) => {
+                      setFieldValue("status", e);
+                      setStatus(e);
+                    }}
+                    options={[
+                      { label: "🆕 Yangi", value: "NEW" },
+                      {
+                        label: "🔍 Taqriz - baholash va tahlil qilish jarayoni",
+                        value: "REVIEW",
+                      },
+                      {
+                        label:
+                          "📊 Antiplagiat - o‘xshashlik darajasini aniqlash",
+                        value: "PLAGIARISM",
+                      },
+                      { label: "✅ Qabul qilish", value: "ACCEPT" },
+                      { label: "❌ Rad etish", value: "REJECTED" },
+                    ]}
+                    placeholder="Tanlang"
+                  />
+                  <ErrorMessage
+                    className="text-red-700 text-[13px]"
+                    name="author"
+                    component="div"
+                  />
+                  {status === "REJECTED" && (
+                    <div className="mt-5">
+                      <label
+                        htmlFor="reason_for_rejection"
+                        className="block text-sm font-medium leading-6 text-gray-900"
+                      >
+                        Rad etilish sababi
+                        <strong className="text-md text-red-800">*</strong>
+                      </label>
+                      <Field
+                        type="text"
+                        name="reason_for_rejection"
+                        id="reason_for_rejection"
+                        autoComplete="reason_for_rejection"
+                        className="block w-full pl-2 rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      />
+                      <ErrorMessage
+                        className="text-red-700 text-[13px]"
+                        name="reason_for_rejection"
+                        component="div"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="col-span-full">
+                <label
                   htmlFor="description"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  tavfsif
+                  Tavsif
                   <strong className="text-md text-red-800">*</strong>
                 </label>
                 <div className="mt-2">
                   <Input.TextArea
-                      value={values.description}
+                    value={values.description}
                     onChange={(e) =>
                       setFieldValue("description", e.target.value)
                     }
                     rows={6}
-                    placeholder="tavfsif yozing"
+                    placeholder="Tavsif yozing"
                   />
                   <ErrorMessage
                     className="text-red-700 text-[13px]"

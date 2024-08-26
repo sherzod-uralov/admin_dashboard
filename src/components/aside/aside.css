@@ -1,3 +1,5 @@
+/** @format */
+
 a,
 ul,
 li {
@@ -6,7 +8,6 @@ li {
 /* DESKTOP CSS */
 .aside {
   width: 260px;
-  background: #ffffff;
   box-shadow: 0 3px 9px 0 rgba(169, 184, 200, 0.15);
   -webkit-box-shadow: 0 3px 9px 0 rgba(169, 184, 200, 0.15);
   height: 100vh;
@@ -63,6 +64,7 @@ li {
   margin-left: 30px;
 }
 .aside-components {
+  margin-top: 20px;
   padding-left: 0;
 }
 .aside-components li a {

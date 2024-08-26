@@ -5,13 +5,18 @@ import { BrowserRouter } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {Context} from "./state/Context.store";
 import './index.css'
+import {QueryClient, QueryClientProvider} from "react-query";
+
+const queryClient = new QueryClient()
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <BrowserRouter>
-    <Context>
-        <App />
-    </Context>
+    <QueryClientProvider client={queryClient}>
+        <Context>
+            <App />
+        </Context>
+    </QueryClientProvider>
   </BrowserRouter>
 );
 

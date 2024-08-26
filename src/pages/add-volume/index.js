@@ -1,40 +1,40 @@
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
-import { Col, Form, Modal } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
+import { Col, Modal, Button, message, Upload, Input } from "antd";
 import Aside from "../../components/aside";
 import "./add-volume.css";
 import api_url from "../../api";
+import { TiPlus } from "react-icons/ti";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import { GrUpdate } from "react-icons/gr";
 
 const AddVolume = () => {
   const [data, setData] = useState(null);
   const [volume, setVolume] = useState(null);
   const [image, setImage] = useState(null);
   const [changer, setChanger] = useState(true);
+  const [volumeShow, setVolumeShow] = useState(false);
+  const [file, setFile] = useState(null);
+  const [EditVolumeShow, setEditVolumeShow] = useState(false);
 
-  // UseRef
-  const imageInputRef = useRef(null);
-  const title = useRef("");
-  const publicationdate = useRef("");
-  const publicationnumber = useRef("");
-  console.log(data)
-  // GET Volumes
   useEffect(() => {
     axios
       .get(`${api_url}/volume`, {
-        headers: { "Content-Type": "application/json"
-        , Authorization:localStorage.getItem('accessToken')},
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("accessToken"),
+        },
       })
       .then((response) => {
         setVolume(response.data);
-        console.log(response)
+        console.log(response);
       })
       .catch((err) => {
         console.log(err);
       });
-  }, [data, changer]);
+  }, [changer]);
 
-  const [volumeShow, setVolumeShow] = useState(false);
   const handleVolumeClose = () => {
     setVolumeShow(false);
   };
@@ -43,127 +43,176 @@ const AddVolume = () => {
     setVolumeShow(true);
   };
 
-  // Image Upload
-  const handleImageCertificate = async (e) => {
-    e.preventDefault();
-
+  const handleUploadImage = async (file, setImg) => {
     const formData = new FormData();
-    formData.append("file", e.target.files[0]);
-
+    formData.append("file", file);
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/files/upload`,
-        {
-          method: "POST",
-          body: formData,
-          headers: {
-            Authorization: localStorage.getItem("accessToken"),
-          },
-        }
-      );
+      const response = await fetch(`${api_url}/file/upload`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          Authorization: localStorage.getItem("accessToken"),
+        },
+      });
 
       if (response.status === 200) {
         const data = await response.json();
-        const imageId = data.link.fulnamefile; // Get the FullName from the response
-        setImage(imageId);
-        toast.success("Muvaffaqiyatli yuklandi 👌");
-        // Use the fileId as needed (e.g., store it in state or send it to the server)
+        const imageId = data.link.id;
+        setImg(imageId);
+        message.success("Muvaffaqiyatli yuklandi");
       } else {
-        toast.error("Xatolik yuz berdi! 🤯");
+        message.error("Xatolik yuz berdi!");
       }
     } catch (err) {
       console.error("Error uploading file:", err);
-      toast.error("Xatolik yuz berdi! 🤯");
+      message.error("Xatolik yuz berdi!");
     }
   };
-  // POST Volume
-  const handleArticleAdd = async (e) => {
-    if (e && e.preventDefault) {
-      e.preventDefault();
-      window.scrollTo(1000, 1000);
-    }
 
-    const requestOptions = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: localStorage.getItem("accessToken"),
-      },
-      body: JSON.stringify({
-        title: title.current.value,
-        publicationnumber: publicationnumber.current.value,
-        publicationdate: publicationdate.current.value,
-        imageVolume: image,
-      }),
+  const onSubmitBtn = async (values, { resetForm }) => {
+    const completeData = {
+      ...values,
+      image_id: image,
+      source_id: file,
     };
 
-    await fetch(
-      `${process.env.REACT_APP_API_URL}/volumes/create`,
-      requestOptions
-    )
-      .then((response) => {
-        if (response.status === 201) {
-          setData(!data);
-          setVolumeShow(false);
-        }
-      })
-      .catch((err) => console.log(err));
-  };
+    try {
+      const response = await axios.post(
+        `${api_url}/volume/create`,
+        completeData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: localStorage.getItem("accessToken"),
+          },
+        },
+      );
 
-  // Delete
+      if (response.status === 200) {
+        message.success("Nashr muvaffaqiyatli qo'shildi");
+        resetForm();
+        setVolumeShow(false);
+        setData(null);
+        setImage(null);
+        setFile(null);
+        setChanger((prev) => !prev);
+      } else {
+        throw new Error("Failed to submit volume");
+      }
+    } catch (error) {
+      message.info("Barcha maydonlarni to'liq to'ldiring!");
+    }
+  };
+  console.log(image);
+
   const handleCategoryDelete = async (event, id) => {
     event.preventDefault();
-    await fetch(`${process.env.REACT_APP_API_URL}/volumes/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: localStorage.getItem("accessToken"),
-      },
-    })
-      .then((res) => {
-        if (res.status === 200) {
-          setChanger(!changer);
-        }
-      })
-      .catch((err) => console.log(err));
+    try {
+      const response = await axios.delete(`${api_url}/volume/delete/${id}`, {
+        headers: {
+          Authorization: localStorage.getItem("accessToken"),
+        },
+      });
+
+      if (response.status === 200) {
+        setChanger((prev) => !prev);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const departmentStyle = {
-    width: "100%",
-    margin: "0px auto",
+  const onSubmitUpdate = async (values, { resetForm }) => {
+    const completeData = {
+      ...values,
+      image_id: image,
+      source_id: file,
+    };
+
+    try {
+      const response = await axios.post(
+        `${api_url}/volume/${data.id}`,
+        completeData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: localStorage.getItem("accessToken"),
+          },
+        },
+      );
+      console.log(response);
+      if (response.status === 200) {
+        message.success("Nashr muvaffaqiyatli yangilandi");
+        resetForm();
+        setEditVolumeShow(false);
+        setData(null);
+        setImage(null);
+        setFile(null);
+        setChanger((prev) => !prev);
+      } else {
+        throw new Error("Failed to update volume");
+      }
+    } catch (error) {
+      console.log(error);
+      message.error("Nash yangilashda qandaydir xatolik yuz berdi!");
+    }
   };
+
+  const editHandler = (value) => {
+    setData(value);
+    setEditVolumeShow(true);
+    setImage(value.image_id);
+    setFile(value.source_id);
+  };
+
+  const editClose = () => {
+    setData(null);
+    setEditVolumeShow(false);
+    setImage(null);
+    setImage(null);
+  };
+
+  const validationSchema = Yup.object().shape({
+    title: Yup.string().required("Sarlavhani kiritish shart!"),
+    text: Yup.string().required("Matnni kiritish shart!"),
+    description: Yup.string().required("Tavsifni kiritish shart!"),
+  });
 
   return (
     <div className="home volume">
       <div className="asid">
         <Aside />
       </div>
-      <div className="articles-wrapper">
+      <div className="articles-page">
         <div className="filter d-flex">
           <form className="search-card d-flex">
             <label htmlFor="">
               <input placeholder="Search" className="search" type="text" />
             </label>
-            <button className="search-btn  edit-btn">Search</button>
+            <button className="search-btn edit-btn">Search</button>
           </form>
           <div className="add-article">
-            <button
-              className="add-btn department-add__btn edit-btn"
+            <Button
+              icon={<TiPlus className="ml-2" />}
+              iconPosition="end"
+              className="add-btn py-6 px-6 department-add__btn edit-btn"
               onClick={handleVolumeShow}
             >
-              Article Add
-            </button>
+              Nashr qo'shish
+            </Button>
           </div>
         </div>
-        <Col lg={11}>
+        <Col className="pr-[75px]">
           <div>
             <div>
-              <table className="table-wrapper" responsive="lg">
+              <table className="table-wrapper">
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th>Название</th>
-                    <th>Выключать</th>
-                    <th>DELETE</th>
+                    <th>Rasm</th>
+                    <th>Nashr</th>
+                    <th className="text-center">Tahrirlash</th>
+                    <th className="text-center">O'chirish</th>
                   </tr>
                 </thead>
                 <tbody className="articles-table__body">
@@ -174,22 +223,32 @@ const AddVolume = () => {
                         <td>
                           <img
                             style={{ width: "50px", height: "50px" }}
-                            src={`${api_url}${item.image.file_path}`}
+                            src={`${api_url}${item?.image?.file_path}`}
                             alt=""
                           />
                         </td>
                         <td>{item.title}</td>
                         <td>
-                          <button
-                            className="category-btn btn btn-danger"
+                          <GrUpdate
+                            onClick={() => editHandler(item)}
+                            className="m-auto block"
+                          />
+                        </td>
+                        <td>
+                          <svg
+                            width={"24px"}
+                            height={"24px"}
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="rgba(236,26,26,1)"
+                            className="m-auto cursor-pointer"
                             onClick={(event) =>
-                              handleCategoryDelete(event, item._id)
+                              handleCategoryDelete(event, item.id)
                             }
                           >
-                            Удалить
-                          </button>
+                            <path d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM18 8H6V20H18V8ZM9 11H11V17H9V11ZM13 11H15V17H13V11ZM9 4V6H15V4H9Z" />
+                          </svg>
                         </td>
-
                       </tr>
                     ))}
                 </tbody>
@@ -198,64 +257,210 @@ const AddVolume = () => {
           </div>
         </Col>
       </div>
-      {/* Bootstrap Modal */}
       <Modal
-        aria-labelledby="example-modal-sizes-title-sm"
-        style={departmentStyle}
-        size="sm"
-        show={volumeShow}
-        onHide={handleVolumeClose}
+        title="Nashr qo'shish"
+        visible={volumeShow}
+        onCancel={handleVolumeClose}
+        footer={null}
       >
-        <Modal.Header closeButton>
-          <h2 className="modal-title">Add Category</h2>
-        </Modal.Header>
-        <Modal.Body>
-          <form className="add-category volume-add">
-            {/* Title */}
-            <div className="title-wrapper volume-title__wrapper">
-              <h3 className="first-component">Name</h3>
-              <Form.Group controlId="exampleForm.ControlInput1">
-                <Form.Label>Title</Form.Label>
-                <Form.Control ref={title} required type="text" />
-              </Form.Group>
-              <Form.Group controlId="exampleForm.ControlInput2">
-                <Form.Label>Publication Date</Form.Label>
-                <Form.Control
-                  ref={publicationdate}
-                  required
-                  type="date"
-                />
-              </Form.Group>
-            </div>
-
-            <div className="category-file__upload volume-file__upload">
-              <h3 className="file-upload__component">File Upload</h3>
-              <Form.Group controlId="exampleForm.ControlInput3">
-                <Form.Label>Download Image</Form.Label>
-                <Form.Control
-                  ref={imageInputRef}
-                  onChange={(e) => handleImageCertificate(e)}
-                  accept="image/jpg,image/jpeg,image/png"
-                  required
-                  aria-label="file example"
-                  type="file"
-                />
-              </Form.Group>
-              <Form.Group controlId="exampleForm.ControlInput4">
-                <Form.Label>Publication Number</Form.Label>
-                <Form.Control ref={publicationnumber} required type="number" />
-              </Form.Group>
-            </div>
-          </form>
-        </Modal.Body>
-        <div className="footer-modal">
-          <button className="delete-btn" onClick={handleVolumeClose}>
-            Close
-          </button>
-          <button className="edit-btn" onClick={handleArticleAdd} type="submit">
-            Submit
-          </button>
-        </div>
+        <Formik
+          initialValues={{ title: "", text: "", description: "" }}
+          validationSchema={validationSchema}
+          onSubmit={onSubmitBtn}
+        >
+          {({ errors, touched, setFieldValue }) => (
+            <Form>
+              <div className="form-group">
+                <label htmlFor="title">Sarlavha</label>
+                <Field name="title" as={Input} />
+                {errors.title && touched.title ? (
+                  <div className="error text-red-600">{errors.title}</div>
+                ) : null}
+              </div>
+              <div className="form-group">
+                <label htmlFor="text">Matn</label>
+                <Field name="text" as={Input} />
+                {errors.text && touched.text ? (
+                  <div className="error text-red-600">{errors.text}</div>
+                ) : null}
+              </div>
+              <div className="form-group">
+                <label htmlFor="description">Tavsif</label>
+                <Field name="description" as={Input} />
+                {errors.description && touched.description ? (
+                  <div className="error text-red-600">{errors.description}</div>
+                ) : null}
+              </div>
+              <div className="form-group flex flex-col">
+                <label>Sarlavha rasmi</label>
+                <Upload
+                  beforeUpload={(file) => {
+                    handleUploadImage(file, setImage);
+                    return false;
+                  }}
+                  fileList={
+                    image
+                      ? [
+                          {
+                            uid: "-1",
+                            name: "uploaded_image.png",
+                            status: "done",
+                            url: "",
+                          },
+                        ]
+                      : []
+                  }
+                  onRemove={() => {
+                    setImage(null);
+                    setFieldValue("image", null);
+                  }}
+                  accept="image/*"
+                >
+                  <Button className="w-[473px]">Fayl yuklash</Button>
+                </Upload>
+              </div>
+              <div className="form-group flex flex-col">
+                <label>Nashr uchun file yuklang</label>
+                <Upload
+                  beforeUpload={(file) => {
+                    handleUploadImage(file, setFile);
+                    return false;
+                  }}
+                  fileList={
+                    file
+                      ? [
+                          {
+                            uid: "-1",
+                            name: "uploaded_file.pdf",
+                            status: "done",
+                            url: "",
+                          },
+                        ]
+                      : []
+                  }
+                  onRemove={() => {
+                    setFile(null);
+                    setFieldValue("file", null);
+                  }}
+                  accept="application/pdf"
+                >
+                  <Button className="w-[473px]">Fayl yuklash</Button>
+                </Upload>
+              </div>
+              <div className="form-group mt-4">
+                <Button type="primary" htmlType="submit" className="w-full">
+                  Yaratish
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </Modal>
+      <Modal
+        title="Nashrni yangilash"
+        visible={EditVolumeShow}
+        onCancel={editClose}
+        footer={null}
+      >
+        <Formik
+          initialValues={{
+            title: data?.title || "",
+            text: data?.text || "",
+            description: data?.description || "",
+          }}
+          validationSchema={validationSchema}
+          onSubmit={onSubmitUpdate}
+          enableReinitialize={true}
+        >
+          {({ errors, touched, setFieldValue }) => (
+            <Form>
+              <div className="form-group">
+                <label htmlFor="title">Sarlavha</label>
+                <Field name="title" as={Input} />
+                {errors.title && touched.title ? (
+                  <div className="error">{errors.title}</div>
+                ) : null}
+              </div>
+              <div className="form-group">
+                <label htmlFor="text">Matn</label>
+                <Field name="text" as={Input} />
+                {errors.text && touched.text ? (
+                  <div className="error">{errors.text}</div>
+                ) : null}
+              </div>
+              <div className="form-group">
+                <label htmlFor="description">Tavsif</label>
+                <Field name="description" as={Input} />
+                {errors.description && touched.description ? (
+                  <div className="error">{errors.description}</div>
+                ) : null}
+              </div>
+              <div className="form-group flex flex-col">
+                <label>Sarlavha rasmi</label>
+                <Upload
+                  beforeUpload={(file) => {
+                    handleUploadImage(file, setImage);
+                    return false;
+                  }}
+                  value={data.image_id.source_id ? data.source_id : null}
+                  fileList={
+                    image
+                      ? [
+                          {
+                            uid: "-1",
+                            name: "uploaded_image.png",
+                            status: "done",
+                            url: "",
+                          },
+                        ]
+                      : []
+                  }
+                  onRemove={() => {
+                    setImage(null);
+                    setFieldValue("image", null);
+                  }}
+                  accept="image/*"
+                >
+                  <Button className="w-[473px]">Fayl yuklash</Button>
+                </Upload>
+              </div>
+              <div className="form-group flex flex-col">
+                <label>Nashr uchun file yuklang</label>
+                <Upload
+                  beforeUpload={(file) => {
+                    handleUploadImage(file, setFile);
+                    return false;
+                  }}
+                  value={data.image_id ? data.image_id : null}
+                  fileList={
+                    file
+                      ? [
+                          {
+                            uid: "-1",
+                            name: "uploaded_file.pdf",
+                            status: "done",
+                            url: "",
+                          },
+                        ]
+                      : []
+                  }
+                  onRemove={() => {
+                    setFile(null);
+                    setFieldValue("file", null);
+                  }}
+                  accept="application/pdf"
+                >
+                  <Button className="w-[473px]">Fayl yuklash</Button>
+                </Upload>
+              </div>
+              <div className="form-group mt-4">
+                <Button type="primary" htmlType="submit" className="w-full">
+                  Tahrirlash
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
       </Modal>
     </div>
   );
